@@ -12,7 +12,7 @@ metadata:
 spec:
   project: system-utils
   source:
-    repoURL: 'https://github.com/BigKAA/youtube'
+    repoURL: 'git@github.com:cactiuser1/123.git'
     path: argocd/01-clusterapp/04-monitoring-ns
     targetRevision: master
   destination:
