@@ -47,6 +47,8 @@ spec:
           ports:
             - containerPort: 8081
               protocol: TCP
+            - containerPort: 8083
+              protocol: TCP
           env:
             - name: INSTALL4J_ADD_VM_PARAMS
               value: "-Xms2g -Xmx2g -XX:MaxDirectMemorySize=2g"
@@ -72,7 +74,7 @@ spec:
               cpu: "1"
             limits:
               memory: "2Gi"
-              cpu: "2"
+              cpu: "1"
           volumeMounts:
             - mountPath: /nexus-data
               name: nexus-data
@@ -81,7 +83,7 @@ spec:
       name: nexus-data
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: "managed-nfs-storage"
+      storageClassName: managed-nfs-storage
       resources:
         requests:
           storage: 8Gi
@@ -93,18 +95,23 @@ metadata:
   name: nexus-0
   namespace: nexus
 spec:
+  type: NodePort
   ports:
     - name: http-main
       port: 8081
       protocol: TCP
       targetPort: 8081
+    - name: http-docker-rep
+      port: 8083
+      protocol: TCP
+      targetPort: 8083
   selector:
     app: nexus
     section: tools
     statefulset.kubernetes.io/pod-name: nexus-0
 
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -117,11 +124,25 @@ metadata:
     section: tools
 spec:
   rules:
-    - host: nexus.kryukov.local
+    - host: test.nur
       http:
         paths:
-          - backend:
-              serviceName: nexus-0
-              servicePort: 8081
-            path: /
-
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: nexus-0
+              port:
+                number: 8081
+     - host: test.nur2
+       http:
+         paths:
+         - path: /
+           pathType: Prefix
+           backend:
+             service:
+               name: nexus-0
+               port:
+                 number: 8083
+#
+#
